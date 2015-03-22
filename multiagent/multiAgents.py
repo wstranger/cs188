@@ -244,11 +244,6 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         return action
 
-def average(lst):
-    lst = list(lst)
-    return sum(lst) / len(lst)
-
-
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
       Your expectimax agent (question 4)
