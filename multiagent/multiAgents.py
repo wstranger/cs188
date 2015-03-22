@@ -142,14 +142,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        def adSearch(state, agentIdx, currPlie):
+        def adSearch(state, agentIdx, ply):
 
             if agentIdx == state.getNumAgents():
 
-                if currPlie == self.depth:
+                if ply == self.depth:
                     return self.evaluationFunction(state)
                 else:
-                    return adSearch(state, 0, currPlie + 1)
+                    return adSearch(state, 0, ply + 1)
 
             else:
                 legalMoves = state.getLegalActions(agentIdx)
@@ -157,7 +157,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 if len(legalMoves) == 0:
                     return self.evaluationFunction(state)
 
-                next = ( adSearch(state.generateSuccessor(agentIdx, m), agentIdx + 1, currPlie) for m in legalMoves)
+                next = ( adSearch(state.generateSuccessor(agentIdx, m), agentIdx + 1, ply) for m in legalMoves)
 
                 return max(next) if agentIdx == 0 else min(next)
 
@@ -176,8 +176,74 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def ABSearch(state):
+            value, bestAction = None, None
+            a, b = None, None
+
+            for action in state.getLegalActions(0):
+                value = max(value,
+                            minValue(state.generateSuccessor(0, action), 1,1, a, b)
+                )
+
+                if a is None:
+                    a = value
+                    bestAction = action
+                else:
+                    a, bestAction = max(value, a), action if value > a else bestAction
+            return bestAction
+
+        def minValue(state, agentIdx, ply, a, b):
+
+            if agentIdx == state.getNumAgents():
+                return maxValue(state, 0, ply + 1, a, b)
+
+            value = None
+
+            for action in state.getLegalActions(agentIdx):
+                succ = minValue(state.generateSuccessor(agentIdx, action),
+                                agentIdx + 1,
+                                ply,
+                                a,
+                                b)
+                value = succ if value is None else min(value, succ)
+                if a is not None and value < a:
+                    return value
+
+                b = value if b is None else min(b, value)
+
+            if value is not None:
+                return value
+            else:
+                return self.evaluationFunction(state)
+
+
+        def maxValue(state, agentIdx, ply, a, b):
+            if ply > self.depth:
+                return self.evaluationFunction(state)
+
+            value = None
+
+            for action in state.getLegalActions(agentIdx):
+                succ = minValue(state.generateSuccessor(agentIdx, action),
+                                agentIdx + 1,
+                                ply,
+                                a,
+                                b)
+                value = max(value, succ)
+                if b is not None and value > b:
+                    return value
+                a = max(a, value)
+
+            if value is not None:
+                return value
+            else:
+                return self.evaluationFunction(state)
+
+        action = ABSearch(gameState)
+
+        return action
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
