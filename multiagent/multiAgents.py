@@ -76,11 +76,8 @@ class ReflexAgent(Agent):
         "*** YOUR CODE HERE ***"
 
         closestGhost = min([manhattanDistance(newPos, ghost.getPosition()) for ghost in newGhostStates])
-
         distance2Ghost = -10 / closestGhost if closestGhost else -1000
-
         foodList = newFood.asList()
-
         closestFood = min([manhattanDistance(newPos, food) for food in foodList]) if foodList else 0
 
         return -2 * closestFood + distance2Ghost - 50 * len(foodList)
@@ -145,7 +142,30 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def adSearch(state, agentIdx, currPlie):
+
+            if agentIdx == state.getNumAgents():
+
+                if currPlie == self.depth:
+                    return self.evaluationFunction(state)
+                else:
+                    return adSearch(state, 0, currPlie + 1)
+
+            else:
+                legalMoves = state.getLegalActions(agentIdx)
+
+                if len(legalMoves) == 0:
+                    return self.evaluationFunction(state)
+
+                next = ( adSearch(state.generateSuccessor(agentIdx, m), agentIdx + 1, currPlie) for m in legalMoves)
+
+                return max(next) if agentIdx == 0 else min(next)
+
+
+        result = max(gameState.getLegalActions(0), key = lambda x: adSearch(gameState.generateSuccessor(0, x), 1, 1))
+        #print result
+        return result
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
