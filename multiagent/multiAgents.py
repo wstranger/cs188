@@ -244,6 +244,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
         return action
 
+def average(lst):
+    lst = list(lst)
+    return sum(lst) / len(lst)
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -258,7 +262,35 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def adSearch(state, agentIdx, ply):
+
+            if agentIdx == state.getNumAgents():
+
+                if ply == self.depth:
+                    return self.evaluationFunction(state)
+                else:
+                    return adSearch(state, 0, ply + 1)
+
+            else:
+                legalMoves = state.getLegalActions(agentIdx)
+
+                if len(legalMoves) == 0:
+                    return self.evaluationFunction(state)
+
+                next = ( adSearch(state.generateSuccessor(agentIdx, m), agentIdx + 1, ply) for m in legalMoves)
+
+                if agentIdx == 0:
+                    return max(next)
+                else:
+                    l = list(next)
+                    return sum(l) / len(l)
+
+
+
+        result = max(gameState.getLegalActions(0), key = lambda x: adSearch(gameState.generateSuccessor(0, x), 1, 1))
+
+        return result
+
 
 def betterEvaluationFunction(currentGameState):
     """
